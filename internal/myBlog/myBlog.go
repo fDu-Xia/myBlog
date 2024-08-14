@@ -1,10 +1,14 @@
 package myBlog
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"os"
 )
+
+var configFile string
 
 var rootCmd = &cobra.Command{
 	Use:   "myBlog",
@@ -15,19 +19,19 @@ var rootCmd = &cobra.Command{
 		return run()
 	},
 	SilenceUsage: true,
-	Args: func(cmd *cobra.Command, args []string) error {
-		for _, arg := range args {
-			if len(arg) > 0 {
-				return fmt.Errorf("%q does not take any arguments, got %q", cmd.CommandPath(), args)
-			}
-		}
+}
 
-		return nil
-	},
+func init() {
+	cobra.OnInitialize(initConfig)
+	rootCmd.PersistentFlags().StringVarP(&configFile, "configs", "c", "", "The path to the blog system configuration file. Empty string for no configuration file.")
 }
 
 func run() error {
-	fmt.Println("Hello myBlog!")
+	// 打印所有的配置项及其值
+	settings, _ := json.Marshal(viper.AllSettings())
+	fmt.Println(string(settings))
+	// 打印 db -> username 配置项的值
+	fmt.Println(viper.GetString("db.username"))
 	return nil
 }
 
