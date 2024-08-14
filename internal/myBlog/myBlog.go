@@ -14,6 +14,16 @@ var rootCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return run()
 	},
+	SilenceUsage: true,
+	Args: func(cmd *cobra.Command, args []string) error {
+		for _, arg := range args {
+			if len(arg) > 0 {
+				return fmt.Errorf("%q does not take any arguments, got %q", cmd.CommandPath(), args)
+			}
+		}
+
+		return nil
+	},
 }
 
 func run() error {
