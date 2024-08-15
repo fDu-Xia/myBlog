@@ -37,7 +37,7 @@ func run() error {
 
 	// 创建 Gin 引擎
 	g := gin.New()
-	g.Use(gin.Recovery(), middleware.RequestID())
+	g.Use(gin.Recovery(), middleware.RequestID(), middleware.NoCache)
 
 	// 注册 404 Handler.
 	g.NoRoute(func(c *gin.Context) {
