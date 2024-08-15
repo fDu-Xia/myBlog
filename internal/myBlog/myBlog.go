@@ -1,10 +1,12 @@
 package myBlog
 
 import (
-	"encoding/json"
+	"errors"
+	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"myBlog/internal/pkg/log"
+	"net/http"
 	"os"
 )
 
@@ -30,11 +32,25 @@ func init() {
 }
 
 func run() error {
-	// 打印所有的配置项及其值
-	settings, _ := json.Marshal(viper.AllSettings())
-	log.Infow(string(settings))
-	// 打印 db -> username 配置项的值
-	log.Infow(viper.GetString("db.username"))
+	gin.SetMode(viper.GetString("runmode"))
+
+	// 创建 Gin 引擎
+	g := gin.Default()
+
+	// 注册 404 Handler.
+	g.NoRoute(func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"code": 10003, "message": "Page not found."})
+	})
+
+	// 注册 /ping handler.
+	g.GET("/ping", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
+	// 创建Http服务器实例
+	httpServer := &http.Server{Addr: viper.GetString("addr"), Handler: g}
+	if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		log.Fatalw(err.Error())
+	}
 	return nil
 }
 
