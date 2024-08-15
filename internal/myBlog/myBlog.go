@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"myBlog/internal/middleware"
 	"myBlog/internal/pkg/log"
 	"net/http"
 	"os"
@@ -32,10 +33,11 @@ func init() {
 }
 
 func run() error {
-	gin.SetMode(viper.GetString("runmode"))
+	gin.SetMode(viper.GetString("run-mode"))
 
 	// 创建 Gin 引擎
-	g := gin.Default()
+	g := gin.New()
+	g.Use(gin.Recovery(), middleware.RequestID())
 
 	// 注册 404 Handler.
 	g.NoRoute(func(c *gin.Context) {
@@ -44,6 +46,7 @@ func run() error {
 
 	// 注册 /ping handler.
 	g.GET("/ping", func(c *gin.Context) {
+		log.C(c).Infow("ping function called")
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 	// 创建Http服务器实例
