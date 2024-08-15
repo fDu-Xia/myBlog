@@ -1,6 +1,7 @@
 package myBlog
 
 import (
+	"context"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
@@ -9,6 +10,9 @@ import (
 	"myBlog/internal/pkg/log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 var configFile string
@@ -51,9 +55,29 @@ func run() error {
 	})
 	// 创建Http服务器实例
 	httpServer := &http.Server{Addr: viper.GetString("addr"), Handler: g}
-	if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		log.Fatalw(err.Error())
+	go func() {
+		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalw(err.Error())
+		}
+	}()
+
+	//捕获关闭信号，优雅关闭服务器
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM) // 此处不会阻塞
+	<-quit                                               // 阻塞在此，当接收到上述两种信号时才会往下执行
+	log.Infow("Shutting down server ...")
+
+	//设置10s时间处理未处理完的请求
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := httpServer.Shutdown(ctx); err != nil {
+		log.Errorw("Insecure Server forced to shutdown", "err", err)
+		return err
 	}
+
+	log.Infow("Server Exit")
+
 	return nil
 }
 
