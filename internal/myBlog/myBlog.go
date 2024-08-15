@@ -2,9 +2,9 @@ package myBlog
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"myBlog/internal/pkg/log"
 	"os"
 )
 
@@ -16,6 +16,9 @@ var rootCmd = &cobra.Command{
 	Long: `myBlog is a blog system written by golang
                 Complete documentation is available at https://github.com/fDu-Xia/myBlog`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		//初始化全局Logger配置
+		log.Init(logOptions())
+		defer log.Sync()
 		return run()
 	},
 	SilenceUsage: true,
@@ -29,9 +32,9 @@ func init() {
 func run() error {
 	// 打印所有的配置项及其值
 	settings, _ := json.Marshal(viper.AllSettings())
-	fmt.Println(string(settings))
+	log.Infow(string(settings))
 	// 打印 db -> username 配置项的值
-	fmt.Println(viper.GetString("db.username"))
+	log.Infow(viper.GetString("db.username"))
 	return nil
 }
 
