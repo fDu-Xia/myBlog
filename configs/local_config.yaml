@@ -18,4 +18,23 @@ log:
   output-paths: [./tmp/blog.log, stdout]
   errorOutputPaths: [./temp/error.log, stderr]
 
+#http server
 addr: :8080
+
+#cors
+Cors:
+  AllowOrigins: # 允许的来源列表
+    - "http://localhost:5173"
+  AllowMethods: # 允许的 HTTP 方法列表
+    - "GET"
+    - "POST"
+    - "PUT"
+    - "DELETE"
+    - "OPTIONS"
+  AllowHeaders: # 允许的 HTTP 头部列表
+    - "Content-Type"
+    - "Authorization"
+  MaxAge: # 12h预检请求的缓存时间
+  AllowCredentials: true # 是否允许凭证（如 cookies）跨源发送
+  ExposeHeaders: # 允许客户端访问的响应头部列表
+    - "Content-Length"
