@@ -7,6 +7,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"myBlog/internal/middleware"
+	"myBlog/internal/pkg/core"
+	"myBlog/internal/pkg/errno"
 	"myBlog/internal/pkg/log"
 	"net/http"
 	"os"
@@ -45,13 +47,13 @@ func run() error {
 
 	// 注册 404 Handler.
 	g.NoRoute(func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"code": 10003, "message": "Page not found."})
+		core.WriteResponse(c, errno.ErrPageNotFound, nil)
 	})
 
 	// 注册 /ping handler.
 	g.GET("/ping", func(c *gin.Context) {
 		log.C(c).Infow("ping function called")
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+		core.WriteResponse(c, nil, gin.H{"status": "ok"})
 	})
 	// 创建Http服务器实例
 	httpServer := &http.Server{Addr: viper.GetString("addr"), Handler: g}
