@@ -27,6 +27,9 @@ var rootCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		//初始化全局Logger配置
 		log.Init(logOptions())
+		if err := initStore(); err != nil {
+			return err
+		}
 		defer log.Sync()
 		return run()
 	},

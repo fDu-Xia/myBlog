@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"myBlog/internal/myBlog/store"
 	"myBlog/internal/pkg/log"
+	"myBlog/pkg/db"
 	"os"
 	"path/filepath"
 	"strings"
@@ -62,4 +64,19 @@ func logOptions() *log.Options {
 		Format:            viper.GetString("log.format"),
 		OutputPaths:       viper.GetStringSlice("log.output-paths"),
 	}
+}
+
+func initStore() error {
+	var dbOptions db.MySQLOptions
+	if err := viper.UnmarshalKey("db", &dbOptions); err != nil {
+		log.Errorw("fail to decode db config")
+	}
+	ins, err := db.NewMySQL(&dbOptions)
+	if err != nil {
+		return err
+	}
+
+	_ = store.NewStore(ins)
+
+	return nil
 }
