@@ -6,10 +6,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"myBlog/internal/known"
 	"myBlog/internal/middleware"
-	"myBlog/internal/pkg/core"
-	"myBlog/internal/pkg/errno"
 	"myBlog/internal/pkg/log"
+	"myBlog/pkg/token"
 	"net/http"
 	"os"
 	"os/signal"
@@ -27,9 +27,10 @@ var rootCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		//初始化全局Logger配置
 		log.Init(logOptions())
-		if err := initStore(); err != nil {
-			return err
-		}
+		//存储层初始化
+		initStore()
+		//jwt初始化
+		token.Init(viper.GetString("jwt-secret"), known.XUsernameKey)
 		defer log.Sync()
 		return run()
 	},
@@ -48,16 +49,11 @@ func run() error {
 	g := gin.New()
 	g.Use(gin.Recovery(), middleware.RequestID(), middleware.NoCache, middleware.Cors())
 
-	// 注册 404 Handler.
-	g.NoRoute(func(c *gin.Context) {
-		core.WriteResponse(c, errno.ErrPageNotFound, nil)
-	})
+	err := installRouters(g)
+	if err != nil {
+		return err
+	}
 
-	// 注册 /ping handler.
-	g.GET("/ping", func(c *gin.Context) {
-		log.C(c).Infow("ping function called")
-		core.WriteResponse(c, nil, gin.H{"status": "ok"})
-	})
 	// 创建Http服务器实例
 	httpServer := &http.Server{Addr: viper.GetString("addr"), Handler: g}
 	go func() {

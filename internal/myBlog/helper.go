@@ -66,17 +66,14 @@ func logOptions() *log.Options {
 	}
 }
 
-func initStore() error {
+func initStore() {
 	var dbOptions db.MySQLOptions
 	if err := viper.UnmarshalKey("db", &dbOptions); err != nil {
 		log.Errorw("fail to decode db config")
 	}
 	ins, err := db.NewMySQL(&dbOptions)
 	if err != nil {
-		return err
+		log.Errorw("fail to connect mysql")
 	}
-
 	_ = store.NewStore(ins)
-
-	return nil
 }

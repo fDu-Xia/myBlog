@@ -1,6 +1,9 @@
 package errno
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 type Errno struct {
 	HTTP    int
@@ -17,6 +20,18 @@ func (errno *Errno) SetMessage(format string, args ...interface{}) *Errno {
 	return errno
 }
 
-func (errno *Errno) Decode() (int, string, string) {
-	return errno.HTTP, errno.Code, errno.Message
+func Decode(err error) (int, string, string) {
+	if err == nil {
+		return OK.HTTP, OK.Code, OK.Message
+	}
+
+	var typed *Errno
+	switch {
+	case errors.As(err, &typed):
+		return typed.HTTP, typed.Code, typed.Message
+	default:
+	}
+
+	// 默认返回未知错误码和错误信息. 该错误代表服务端出错
+	return InternalServerError.HTTP, InternalServerError.Code, err.Error()
 }

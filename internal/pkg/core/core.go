@@ -15,9 +15,9 @@ type ErrResponse struct {
 	Message string `json:"message"`
 }
 
-func WriteResponse(c *gin.Context, err *errno.Errno, data interface{}) {
+func WriteResponse(c *gin.Context, err error, data interface{}) {
 	if err != nil {
-		hCode, code, message := err.Decode()
+		hCode, code, message := errno.Decode(err)
 		c.JSON(hCode, ErrResponse{
 			Code:    code,
 			Message: message,

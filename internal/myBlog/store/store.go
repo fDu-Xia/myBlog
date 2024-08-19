@@ -35,6 +35,11 @@ func NewStore(db *gorm.DB) IStore {
 	return S
 }
 
+// DB 返回存储在 datastore 中的 *gorm.DB.
+func (ds *datastore) DB() *gorm.DB {
+	return ds.db
+}
+
 // Users 返回一个实现了 GetUserStore 接口的实例.
 func (ds *datastore) Users() UserStore {
 	return newUserStore(ds.db)
