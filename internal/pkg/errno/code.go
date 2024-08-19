@@ -36,3 +36,6 @@ var (
 	// ErrPasswordIncorrect 表示密码不正确.
 	ErrPasswordIncorrect = &Errno{HTTP: 401, Code: "InvalidParameter.PasswordIncorrect", Message: "Password was incorrect."}
 )
+
+// ErrPostNotFound 表示未找到博客.
+var ErrPostNotFound = &Errno{HTTP: 404, Code: "ResourceNotFound.PostNotFound", Message: "Post was not found."}

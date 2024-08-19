@@ -1,0 +1,35 @@
+syntax = "proto3"; // 告诉编译器此文件使用什么版本的语法
+
+package v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "myBlog/pkg/proto/v1";
+
+// MiniBlog 定义了一个 MiniBlog RPC 服务.
+service MiniBlog {
+  rpc ListUser(ListUserRequest) returns (ListUserResponse) {}
+}
+
+message UserInfo {
+  string username = 1;
+  string nickname = 2;
+  string email = 4;
+  string phone = 5;
+  int64 postCount = 6;
+  google.protobuf.Timestamp createdAt = 7;
+  google.protobuf.Timestamp updatedAt = 8;
+}
+
+// ListUserRequest 指定了 `ListUser` 接口的请求参数.
+message ListUserRequest {
+  optional int64 limit = 1;
+  optional int64 offset = 2;
+}
+
+
+// ListUserResponse 指定了 `GET /v1/users` 接口的返回参数，相当于 HTTP Response.
+message ListUserResponse {
+  int64 totalCount = 1;
+  repeated UserInfo Users = 2;
+}

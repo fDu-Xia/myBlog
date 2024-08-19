@@ -3,7 +3,7 @@ package myBlog
 import (
 	"github.com/gin-gonic/gin"
 	"myBlog/internal/middleware"
-	"myBlog/internal/myBlog/controller/v1/user"
+	"myBlog/internal/myBlog/controller/v1"
 	"myBlog/internal/myBlog/store"
 	"myBlog/internal/pkg/core"
 	"myBlog/internal/pkg/errno"
@@ -28,7 +28,8 @@ func installRouters(g *gin.Engine) error {
 		core.WriteResponse(c, nil, gin.H{"status": "ok"})
 	})
 
-	userCtrl := user.New(store.S, authz)
+	userCtrl := v1.NewUserCtrl(store.S, authz)
+	postCtrl := v1.NewPostCtrl(store.S)
 
 	g.POST("/login", userCtrl.Login)
 
@@ -42,6 +43,17 @@ func installRouters(g *gin.Engine) error {
 			u1.Use(middleware.Authn(), middleware.Authz(authz))
 			u1.PUT(":name/change-password", userCtrl.ChangePassword)
 			u1.GET(":name", userCtrl.Get)
+		}
+
+		// 创建 posts 路由分组
+		p1 := v1.Group("/posts", middleware.Authn())
+		{
+			p1.POST("", postCtrl.Create)             // 创建博客
+			p1.GET(":postID", postCtrl.Get)          // 获取博客详情
+			p1.PUT(":postID", postCtrl.Update)       // 更新用户
+			p1.DELETE("", postCtrl.DeleteCollection) // 批量删除博客
+			p1.GET("", postCtrl.List)                // 获取博客列表
+			p1.DELETE(":postID", postCtrl.Delete)    // 删除博客
 		}
 	}
 

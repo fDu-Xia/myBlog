@@ -1,4 +1,4 @@
-package user
+package v1
 
 import (
 	"github.com/asaskevich/govalidator"
@@ -19,8 +19,8 @@ type Controller struct {
 	b biz.IBiz
 }
 
-// New 创建一个 user controller.
-func New(ds store.IStore, a *auth.Authz) *Controller {
+// NewUserCtrl 创建一个 user controller.
+func NewUserCtrl(ds store.IStore, a *auth.Authz) *Controller {
 	return &Controller{a: a, b: biz.NewBiz(ds)}
 }
 

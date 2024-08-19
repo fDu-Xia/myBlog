@@ -27,7 +27,7 @@ type userBiz struct {
 
 var _ UserBiz = (*userBiz)(nil)
 
-func New(ds store.IStore) *userBiz {
+func NewUserBiz(ds store.IStore) *userBiz {
 	return &userBiz{ds: ds}
 }
 
